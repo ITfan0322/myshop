@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+<title>个人中心</title>
+<script type="text/javascript" src="../js/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="js/setcookie.js"></script>
+</head>
+<script type="text/javascript">
+	function aa() {
+		window.location.href = "order.html"
+	}
+	function bb() {
+		window.location.href = "myorder.html"
+	}
+	$(function() {
+		if (getCookie("phone") == null || getCookie("name") == null) {
+			window.location.href = "index.html"
+		} else {
+			console.log(getCookie("type"))
+			$(".name").html(getCookie("name"))
+				$(".phone").html(getCookie("phone"))
+				$(".shops").html(getCookie("shop"))
+				$(".type").html(getCookie("type"))
+			if (getCookie("type") == '店长') {
+				$(".footer_1").show()
+			} else {
+				$(".footer_1").hide()
+				
+				
+			}
+
+		}
+
+	})
+	function exit() {
+		delCookie("name")
+		delCookie("phone")
+		delCookie("shop")
+		delCookie("type")
+		delCookie("pwd")
+		window.location.href = "index.html"
+	}
+	function change(){
+		$(".cha").css("display","flex")
+	}
+	function cancle(){
+		$(".cha").hide()
+	}
+	function sure(){
+		if($("#oldpwd").val()!=getCookie("pwd")){
+			alert("原密码不正确")
+		}else{
+		$.ajax({
+			url:"../updateAdminPwd",
+			data:{
+				phone:getCookie("phone"),
+				pwd:$("#newpwd").val()
+			},
+			success:function(r){
+				console.log(r)
+				$(".cha").hide()
+			}
+		})
+		}
+	} 
+</script>
+<style>
+<!--
+-->
+* {
+	margin: 0;
+	padding: 0;
+	font-family: "微软雅黑";
+}
+
+html {
+	height: 100%;
+	width: 100%;
+}
+
+body {
+	background-color: #f4f4f4;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+}
+
+.info {
+	display: flex;
+	flex-direction: row;
+	width: 95%;
+	align-items: center;
+	padding-left: 2.5%;
+	padding-right: 2.5%;
+	height: 50px;
+	line-height: 50px;
+	justify-content: space-between;
+	text-indent: 5px;
+	margin-top: 1px;
+	background-color: #fff;
+}
+
+.info span {
+	text-indent: 20px;
+	color: darkgray;
+}
+
+.but {
+	position: absolute;
+	bottom: 70px;
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-around;
+}
+
+.but div {
+	width: 150px;
+	color: #fff;
+	height: 30px;
+	line-height: 30px;
+	text-align: center;
+	border-radius: 3px;
+	font-size: 14px;
+}
+
+.exit {
+	background-color: red;
+}
+
+.change {
+	background-color: orange;
+}
+
+.footer {
+	display: flex;
+	flex-direction: row;
+	position: fixed;
+	bottom: 0px;
+	width: 100%;
+	z-index: 999;
+}
+
+.footer div {
+	box-sizing: border-box;
+	width: 50%;
+	height: 45px;
+	line-height: 45px;
+	border-top: 1px solid #d4d4d4;
+	float: left;
+	text-align: center;
+	margin-right: 2px;
+	background-color: white
+}
+.cha{
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.5);
+	display: none;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
+}
+.cha_main{
+	padding: 20px;
+	background-color: #fff;
+}
+.cha_main div{
+	
+}
+.cha_b{
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+.cha_b div{
+width: 50%;
+text-align: center;
+margin-top: 20px;
+}
+
+</style>
+<body>
+	<div class="cha" >
+		<div class="cha_main">
+			<div>
+				原密码 <input type="text" id="oldpwd">
+			</div>
+			<div style="margin-top: 20px;" >
+				新密码 <input type="text" id="newpwd">
+			</div>
+			<div class="cha_b">
+			<div onclick="cancle()">取消</div>
+			<div onclick="sure()">确定</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="info">
+		姓名： <span class="name"></span>
+	</div>
+	<div class="info">
+		电话： <span class="phone"></span>
+	</div>
+	<div class="info">
+		店铺： <span class="shops"></span>
+	</div>
+	<div class="info">
+		职位： <span class="type"></span>
+	</div>
+	<div class="but">
+		<div class="exit" onclick="exit()">退出登录</div>
+		<div class="change" onclick="change()">修改密码</div>
+	</div>
+
+	<div class="footer">
+		<div class="footer_1" onclick="aa()">订单池</div>
+		<div id="" onclick="bb()">我的订单</div>
+		<div id="" style="color: orange">个人中心</div>
+	</div>
+</body>
+</html>

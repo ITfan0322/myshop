@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport"
+	content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+<title>登录</title>
+<script type="text/javascript" src="../js/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="js/setcookie.js"></script>
+</head>
+<style type="text/css">
+.container {
+	display: flex;
+	flex-direction: column;
+	height: 500px;
+	width: 100%;
+	align-items: center;
+	justify-content: center;
+}
+
+.header {
+	margin-bottom: 80px;
+}
+
+.first {
+	margin-bottom: 20px;
+}
+
+input {
+	margin-left: 20px;
+	height: 28px;
+	font-size:16px;
+	border:none;
+	border-bottom:1px solid #f4f4f4;
+	background-color:#fff;
+	text-indent:5px;
+}
+
+.first text {
+	display: inline-block;
+	width: 60px;
+	text-align: right;
+}
+
+button {
+	width: 150px;
+	height: 35px;
+	line-height:35px;
+	border-radius:3px;
+	color: white;
+	background-color: #1DB584;
+	border:1px solid #1DB584;
+	margin-top: 20px;
+	font-size:16px;
+}
+</style>
+<script type="text/javascript">
+$(function(){
+	console.log(getCookie("shop"))
+	console.log(getCookie("name"))
+	$(".shops").html(getCookie("shop"))
+	if(getCookie("phone")==null||getCookie("name")==null){
+		//window.location.href="index.html"
+	}else{
+		if(getCookie("type")=='店长'){
+			
+			window.location.href="order.html"
+			}else if(getCookie("type")=='骑手'){
+				window.location.href="myorder.html"
+			}
+	}
+	
+})
+	function login() {
+		var phone = $("#phone").val()
+		var pwd = $("#pwd").val()
+		console.log(phone)
+		$.ajax({
+			url:"../findByPhone",
+			data:{
+				phone:phone,
+				pwd:pwd
+			},
+			dataType:"json",
+			success:function(data){
+				console.log(data)
+				if(data==0){
+					alert("账号密码不正确")
+				}else{
+					setCookie("name",data.name,30)
+					setCookie("phone",data.phone,30)
+					setCookie("pwd",data.pwd,30)
+					setCookie("type",data.type,30)
+					setCookie("shop",data.shops,30)
+					if(data.type=='店长'){
+						
+					window.location.href="order.html"
+					}else if(data.type=='骑手'){
+						window.location.href="myorder.html"
+					}
+				}
+				/* if(data=='null'){
+					console.log("null")
+					alert("账号密码不正确")
+				}else{
+					console.log("yes")
+				} */
+			}
+		})
+	}
+</script>
+<body>
+	<div class="container">
+
+		<div class="header">
+			<text> 新美特 </text>
+		</div>
+		<div class="first">
+			<text> 手机号: </text>
+			<input type="number" name="" id="phone" value="" placeholder="请输入手机号" />
+		</div>
+		<div class="first">
+			<text> 密 码: </text>
+			<input type="password" name="" id="pwd" value="" placeholder="请输入密码" />
+		</div>
+		<button onclick="login()">登录</button>
+	</div>
+</body>
+</html>

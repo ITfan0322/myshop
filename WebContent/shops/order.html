@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link rel="stylesheet" type="text/css" href="css/order.css"/>
+		<script type="text/javascript" src="../js/jquery-2.2.4.min.js"></script>
+		<script type="text/javascript" src="js/setcookie.js"></script>
+		<script type="text/javascript">
+			function aa(){
+				window.location.href="myorder.html"
+			}
+			function bb(){
+				window.location.href="my.html"
+			}
+			$(function(){
+				console.log(getCookie("shop"))
+				console.log(getCookie("name"))
+				$(".shops").html(getCookie("shop"))
+				if(getCookie("phone")==null||getCookie("name")==null){
+					window.location.href="index.html"
+				}else{
+					console.log(getCookie("type"))
+					if(getCookie("type")=='店长'){
+						$(".footer_1").show()
+					}else{
+						$(".footer_1").hide()
+					}
+					show()
+				}
+				
+			})
+			function show(){
+				$.ajax({
+					url:"../findAllOrders",
+					data:{},
+					dataType:"json",
+					success:function(data){
+						$("#orderlist").html("")
+						//console.log(data)
+						for(var j=0;j<data.length;j++ ){
+							data[j].content=  JSON.parse(data[j].content)
+							
+						}
+						for(var i=0;i<data.length;i++ ){
+							if(data[i].state==1){
+								console.log(data[i].content[0].img)
+								var str='<div class="container" onclick="todetail('+data[i].id+')">'
+									+'<div class="first">'
+									+'<img src="img/logo.png" class="img1"/>'
+									+'<text>'+data[i].ordernum+'</text>'
+									+'<img src="img/zhuandao.png" class="img2"/>'
+									+'<text class="text1"style="color: #b0b0b0;">待接单</text>'
+									+'</div>'
+									+'<div class="second">'
+									+'<img src="'+data[i].content[0].menus.img+'"class="img1"/>'
+									+'<text>'+data[i].content[0].menus.name+'</text>'
+									+'<text class="text1">￥'+data[i].content[0].menus.price+'元</text>'
+									+'</div>'
+									+'<div class="third">'
+									+'<text>'+data[i].dates+'</text>'
+									+'<text>共'+data[i].content.length+'个订单</text>'
+									+'<text class="">总价：￥'+data[i].price+'元 </text>'
+									+'</div>'
+									+'</div>'
+									$("#orderlist").append(str)
+							}
+						}
+						console.log(data)
+					}
+				})
+			}
+			function todetail(id){
+				window.location.href="orderdetail.html?id="+id
+			}
+		</script>
+		<title>订单池</title>
+		
+	</head>
+	<body>
+		<div class="shops" style="width: 100%;text-align: center;color: darkgray;height: 25px;line-height: 25px;font-size:14px;margin-top:5px;">
+		负责店铺名称
+		</div>
+		<div style="padding-bottom:45px;" id="orderlist">
+		
+		
+		</div>
+		
+		
+		
+		
+		
+		<div class="footer">
+			<div class="footer_1" style="color:orange" hidden="hidden">
+				订单池
+			</div>
+			<div id=""  onclick="aa()">
+				我的订单
+			</div>
+			<div id="" onclick="bb()">
+				个人中心
+			</div>
+		</div>
+		
+	</body>
+</html>

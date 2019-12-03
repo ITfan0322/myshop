@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="format-detection" content="telephone=yes"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link rel="stylesheet" type="text/css" href="css/orderdetail.css"/>
+		<script type="text/javascript" src="../js/jquery-2.2.4.min.js"></script>
+		<script type="text/javascript" src="js/jweixin-1.4.0.js"></script>
+		<script type="text/javascript" src="js/setcookie.js"></script>
+		<title>订单详情</title>
+		<script type="text/javascript">
+		var ordernum=0
+		var url = location.search;
+		var Request = new Object();
+		if(url.indexOf("?") != -1) {　　
+			var str = url.substr(1)　 //去掉?号
+			　　 strs = str.split("&");　　
+			for(var i = 0; i < strs.length; i++)　　 {　　　
+				Request[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);　　
+			}
+		}
+		$(function(){
+			getToken()
+			if(getCookie("phone")==null||getCookie("name")==null){
+				window.location.href="index.html"
+			}else{
+				console.log(getCookie("type"))
+				
+				show()
+			}
+		})
+		function show(){
+			$.ajax({
+				url:"../findOrderById",
+				data:{
+					id:Request["id"]
+				},
+				dataType:"json",
+				success:function(data){
+					ordernum=data.ordernum
+					if(data.state==1){
+						$("#p").hide()
+					}else{
+						$(".pphone").html(data.pphone)
+						$(".pname").html(data.pname)
+						$("#p").show()
+					}
+					if(getCookie("type")=='店长'){
+						if(data.state==1){
+						$(".but1").html("转发")
+						$(".footer").show()
+						}else if(data.state==2){
+							$(".but1").html("完成订单")
+							$(".footer").show()
+						}else{
+							$(".footer").hide()
+						}
+					}else if(getCookie("type")=='骑手'){
+						if(data.state==1){
+							$(".but1").html("接单")
+							$(".footer").show()
+						}else if(data.state==2){
+							$(".but1").html("完成订单")
+							$(".footer").show()
+						}else{
+							$(".footer").hide()
+						}
+					}
+					$(".menulist").html("")
+					data.content=JSON.parse(data.content)
+					console.log(data)
+					for(var i=0;i<data.content.length;i++){
+						var str = '<div class="shangpin">'
+							+'<img src="'+data.content[i].menus.img+'"/>'
+							+'<div class="right">'
+							+'<div class="text1">'+data.content[i].menus.name+'</div>'
+							+'<div class="text2">规格：'+data.content[i].menus.message+'</div>'
+							+'<div class="text3">'
+							+'<text class="text4">￥'+data.content[i].menus.price+'</text>'
+							+'<text> x '+data.content[i].num+'</text>'
+							+'</div>'
+							+'</div>'
+							+'</div>'
+							$(".menulist").append(str)
+					}
+					$(".ordernum").html(data.ordernum)
+					$(".dates").html(data.dates)
+					$(".name").html(data.name)
+					$(".phone").html(data.phone)
+					$(".phone").attr("href","tel:"+data.phone)
+					$(".address").html(data.address)
+					$(".shops").html(data.shops)
+					$(".num").html(data.content.length)
+					$(".text5").html("￥"+(data.price*1).toFixed(2))
+				}
+			})
+		}
+		
+		
+		function getToken(){
+			 console.log(document.cookie)
+				if(getCookie("token")==null||getCookie("ticket")==null||typeof(getCookie("token")) == 'undefined'||typeof(getCookie("ticket")) =='undefined'){
+				
+				$.ajax({
+					method:"post",
+					url:"../getToken",
+					data:{},
+					jsonType:"JSON",
+					success:function(data){
+						console.log(JSON.parse(data))
+						var map = JSON.parse(data)
+						if(data!=null){
+						setCookie("token",map.token)
+						setCookie("ticket",map.ticket)
+						getTicket(map.ticket)
+						}
+					
+						/* wx.config({
+						    debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+						    appId: '', // 必填，公众号的唯一标识
+						    timestamp: "", // 必填，生成签名的时间戳
+						    nonceStr: '', // 必填，生成签名的随机串
+						    signature: '',// 必填，签名
+						    jsApiList: [
+						    	updateAppMessageShareData,
+						    	updateTimelineShareData
+						    ] // 必填，需要使用的JS接口列表
+						}); */
+
+					}
+				})	
+				}else{
+					getTicket(getCookie("ticket"))
+				}
+		}
+
+		
+		function getTicket(ticket){
+			$.ajax({
+				method:"post",
+				url:"../getTicket",
+				data:{
+					ticket:ticket,
+					url:location.href
+				},
+				jsonType:"JSON",
+				success:function(data){
+					console.log(JSON.parse(data))
+					var map = JSON.parse(data)
+					 wx.config({
+					    debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+					    appId: map.appid, // 必填，公众号的唯一标识
+					    timestamp: map.timestamp, // 必填，生成签名的时间戳
+					    nonceStr: map.nonceStr, // 必填，生成签名的随机串
+					    signature: map.signature,// 必填，签名
+					    jsApiList: [
+					    	 'updateAppMessageShareData',
+					    	'updateTimelineShareData' 
+					    ] // 必填，需要使用的JS接口列表
+					}); 
+
+				}
+			})
+		}
+
+		wx.ready(function () {   //需在用户可能点击分享按钮前就先调用
+		   wx.updateAppMessageShareData({
+		       title: '您有一个新订单', // 分享标题
+		       desc: '快来接单吧', // 分享描述
+		       link: 'https://www.xbboom.com/supermarket/shops/orderdetail.html?id='+Request["id"], // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+		       imgUrl: 'https://www.xbboom.com/supermarket/shops/img/logo.png', // 分享图标
+		       success: function () {
+		         // 设置成功
+		       /* 	$.ajax({
+		       		method:"post",
+		       		url:"updateSharenum",
+		       		data:{
+		       			openid:getCookie("openid")
+		       		},
+		       		jsonType:"JSON",
+		       		success:function(data){
+		       			console.log(data)
+		       			openid:getCookie("openid")
+		       			//setCookie30("openid",data)
+
+		       		}
+		       	})	 */
+		       }
+		   })
+		    wx.updateTimelineShareData({
+		       title: '您有一个新订单', // 分享标题
+		       link: 'https://www.xbboom.com/supermarket/shops/orderdetail.html?id='+Request["id"], // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+		       imgUrl: 'https://www.xbboom.com/supermarket/shops/img/logo.png', // 分享图标
+		       success: function () {
+		         // 设置成功
+		       	/* $.ajax({
+		       		method:"post",
+		       		url:"updateSharenum",
+		       		data:{
+		       			openid:openid
+		       		},
+		       		jsonType:"JSON",
+		       		success:function(data){
+		       			console.log(data)
+		       			//setCookie30("openid",data)
+		
+		       		}
+		       	})	 */
+		       }
+		   })
+		});
+		function myclick(){
+			console.log(1111)
+			if($(".but1").html()=='接单'){
+				$.ajax({
+					url:'../updatePeiSong',
+					data:{
+						id:Request["id"],
+						pphone:getCookie("phone"),
+						pname:getCookie("name")
+					},
+					dataType:"json",
+					success:function(data){
+						console.log(data)
+						window.location.href="myorder.html"
+						show()
+					}
+				})
+				console.log("接单")
+			}else if($(".but1").html()=='完成订单'){
+				$.ajax({
+					url:'../updateStates',
+					data:{
+						state:3,
+						ordernum:ordernum,
+						//pname:getCookie("name")
+					},
+					dataType:"json",
+					success:function(data){
+						window.location.href="myorder.html"
+						console.log(data)
+						show()
+					}
+				})
+				console.log("完成单")
+			}else if($(".but1").html()=='转发'){
+				alert("点击右上角转发")
+			}
+		}
+		</script>
+	</head>
+	<body>
+		<div class="container">
+		<div class="menulist">
+			<!-- <div class="shangpin">
+				<img src="img/t8.png"/>
+				<div class="right">
+					<div class="text1">特价行过是的撒的定时关机卡萨丁科技噶第三个开关机大圣归</div>
+					<div class="text2">数量：1500g/份</div>
+					<div class="text3">
+						<text class="text4">￥47.80</text>
+						<text>x1</text>
+					</div>
+				</div>
+			</div> -->
+			</div>
+			
+			<div class="detail">
+				订单号<text class="ordernum"></text>
+			</div>
+			<div class="detail">
+				交易时间<text class="dates"></text>
+			</div>
+			<div class="detail">
+				收货人<text class="name"></text>
+			</div>
+			<div class="detail">
+				收货人电话<a class="phone" ></a>
+			</div>
+			<div class="detail">
+				收货人地址<text class="address"></text>
+			</div>
+			<div class="detail" id="p">
+				店铺<text class="shops"></text>
+			</div>
+			<div class="detail">
+				商品数量<text class="num"></text>
+			</div>
+			<div class="detail" id="p">
+				配送员姓名<text class="pname"></text>
+			</div>
+			<div class="detail" id="p">
+				配送员电话<text class="pphone"></text>
+			</div>
+			<div class="heji">
+				<text>合计:<text class="text5"></text></text>
+			</div>
+			<div class="footer" hidden="hidden">
+				<text class="but1" onclick="myclick()">配送完成</text>
+			</div>
+		</div>
+	</body>
+</html>

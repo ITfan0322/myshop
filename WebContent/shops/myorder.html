@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link rel="stylesheet" type="text/css" href="css/myorder.css"/>
+			<script type="text/javascript" src="../js/jquery-2.2.4.min.js"></script>
+		<script type="text/javascript" src="js/setcookie.js"></script>
+		<title>我的订单</title>
+		<script type="text/javascript">
+			var state=2
+			function aa(){
+				window.location.href="order.html"
+			}
+			function bb(){
+				window.location.href="my.html"
+			}
+			$(function(){
+				if(getCookie("phone")==null||getCookie("name")==null){
+					window.location.href="index.html"
+				}else{
+					console.log(getCookie("type"))
+					if(getCookie("type")=='店长'){
+						$(".footer_1").show()
+						show(state)
+					}else{
+						$(".footer_1").hide()
+						$("#tab4").hide()
+						$("#tab5").hide()
+						show1(state)
+					}
+					
+				}
+			})
+			function show(state){
+				$.ajax({
+					url:"../findAllOrders",
+					data:{},
+					dataType:"json",
+					success:function(data){
+						$("#orderlist").html("")
+						for(var j=0;j<data.length;j++ ){
+							data[j].content=  JSON.parse(data[j].content)
+							
+						}
+						for(var i=0;i<data.length;i++ ){
+							if(data[i].state==state){
+								var str='<div class="container" onclick="todetail('+data[i].id+')">'
+									+'<div class="first">'
+									+'<img src="img/logo.png" class="img1"/>'
+									+'<text>'+data[i].ordernum+'</text>'
+									+'<img src="img/zhuandao.png" class="img2"/>'
+									+'<text class="text1"style="color: #b0b0b0;">'+(data[i].state==2?'配送中':data[i].state==3?'已完成':data[i].state==4?'待取消':data[i].state==5?'已取消':'')+'</text>'
+									+'</div>'
+									+'<div class="second">'
+									+'<img src="'+data[i].content[0].menus.img+'"class="img1"/>'
+									+'<text>'+data[i].content[0].menus.name+'</text>'
+									+'<text class="text1">￥'+data[i].content[0].menus.price+'元</text>'
+									+'</div>'
+									+'<div class="third">'
+									+'<text>'+data[i].dates+'</text>'
+									+'<text>共'+data[i].content.length+'个订单</text>'
+									+'<text class="">总价：￥'+data[i].price+'元 </text>'
+									+'</div>'
+									+'</div>'
+									$("#orderlist").append(str)
+							}
+						}
+						console.log(data)
+					}
+				})
+			}
+			
+			function show1(state){
+				$.ajax({
+					url:"../findOrdersByPphone",
+					data:{
+						pphone:getCookie("phone")
+					},
+					dataType:"json",
+					success:function(data){
+						$("#orderlist").html("")
+						for(var j=0;j<data.length;j++ ){
+							data[j].content=  JSON.parse(data[j].content)
+							
+						}
+						for(var i=0;i<data.length;i++ ){
+							if(data[i].state==state){
+								var str='<div class="container" onclick="todetail('+data[i].id+')">'
+									+'<div class="first">'
+									+'<img src="img/logo.png" class="img1"/>'
+									+'<text>'+data[i].ordernum+'</text>'
+									+'<img src="img/zhuandao.png" class="img2"/>'
+									+'<text class="text1"style="color: #b0b0b0;">'+(data[i].state==2?'配送中':data[i].state==3?'已完成':data[i].state==4?'待取消':data[i].state==5?'已取消':'')+'</text>'
+									+'</div>'
+									+'<div class="second">'
+									+'<img src="'+data[i].content[0].menus.img+'"class="img1"/>'
+									+'<text>'+data[i].content[0].menus.name+'</text>'
+									+'<text class="text1">￥'+data[i].content[0].menus.price+'元</text>'
+									+'</div>'
+									+'<div class="third">'
+									+'<text>'+data[i].dates+'</text>'
+									+'<text>共'+data[i].content.length+'个订单</text>'
+									+'<text class="">总价：￥'+data[i].price+'元 </text>'
+									+'</div>'
+									+'</div>'
+									$("#orderlist").append(str)
+							}
+						}
+						console.log(data)
+					}
+				})
+			}
+			
+			function tab1(num){
+				$("#tab2").css("color","darkgray")
+				$("#tab3").css("color","darkgray")
+				$("#tab4").css("color","darkgray")
+				$("#tab5").css("color","darkgray")
+				$("#tab"+num).css("color","orange")
+				if(getCookie("type")=='店长'){
+					
+				show(num)
+				}else{
+					show1(num)
+				}
+			}
+			function todetail(id){
+				window.location.href="orderdetail.html?id="+id
+			}
+		</script>
+	</head>
+	<body>
+		<div class="header" style="color:darkgray">
+			<div id="tab2" onclick="tab1(2)" style="color:orange">
+				<text>
+					配送中
+				</text>
+			</div>
+			<div id="tab3" onclick="tab1(3)">
+				<text>
+					已完成
+				</text>
+			</div>
+			<div id="tab4" onclick="tab1(4)">
+				<text>
+					待取消
+				</text>
+			</div>
+			<div id="tab5" onclick="tab1(5)">
+				<text>
+					已取消
+				</text>
+			</div>
+		</div>
+			
+		<div style="padding-top:45px;padding-bottom:45px;" id="orderlist">
+			
+		</div>
+		
+		<div class="footer">
+			<div class="footer_1" onclick="aa()">
+				订单池
+			</div>
+			<div id="" style="color:orange">
+				我的订单
+			</div>
+			<div id="" onclick="bb()">
+				个人中心
+			</div>
+		</div>
+	</body>
+</html>
